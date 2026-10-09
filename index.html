@@ -1,0 +1,2056 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>小饭搭子</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --c1: #ffb88c; --c2: #ff8c69; --c-soft: #fff3ec;
+    --c-chip: #ffe0d3; --c-chip-text: #b34a20; --c-shadow: rgba(255,140,105,.25);
+  }
+  body.theme-girl {
+    --c1: #ffb3c6; --c2: #ff8fab; --c-soft: #fff0f4;
+    --c-chip: #ffd9e3; --c-chip-text: #c2185b; --c-shadow: rgba(255,143,171,.28);
+  }
+  body.theme-boy {
+    --c1: #9bc4f8; --c2: #5b9bf0; --c-soft: #eef5ff;
+    --c-chip: #d6e6ff; --c-chip-text: #1d5fa8; --c-shadow: rgba(91,155,240,.28);
+  }
+  body.theme-twins {
+    --c1: #ffe083; --c2: #ffc93c; --c-soft: #fffaeb;
+    --c-chip: #fff0bf; --c-chip-text: #a06800; --c-shadow: rgba(255,201,60,.3);
+  }
+
+  body {
+    margin: 0; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
+    background: #f7f4ef; color: #3a3228; padding-bottom: 70px;
+  }
+  header {
+    background: linear-gradient(135deg, var(--c1), var(--c2));
+    color: #fff; padding: 18px 16px 14px; border-radius: 0 0 22px 22px;
+    box-shadow: 0 4px 14px var(--c-shadow); position: sticky; top: 0; z-index: 10;
+    transition: background .3s;
+  }
+  header h1 { margin: 0; font-size: 20px; letter-spacing: .5px; }
+  header p { margin: 4px 0 0; font-size: 12px; opacity: .9; }
+  .container { padding: 14px 14px 0; }
+  .card {
+    background: #fff; border-radius: 18px; padding: 16px; margin-bottom: 14px;
+    box-shadow: 0 2px 10px rgba(180,150,120,.1);
+  }
+  .card h2 { margin: 0 0 10px; font-size: 16px; display: flex; align-items: center; gap: 6px; }
+  .card h2 .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--c2); transition: background .3s; }
+  label { font-size: 13px; color: #7a6a58; display: block; margin: 10px 0 4px; }
+  input, select, textarea {
+    width: 100%; padding: 10px 12px; border: 1.5px solid #eee3d6; border-radius: 12px;
+    font-size: 15px; background: #fdfbf8; color: #3a3228; outline: none; font-family: inherit;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--c1); }
+  button {
+    border: none; border-radius: 12px; padding: 12px 16px; font-size: 15px;
+    font-weight: 600; cursor: pointer; font-family: inherit; transition: .15s;
+  }
+  .btn-primary { background: linear-gradient(135deg, var(--c1), var(--c2)); color: #fff; width: 100%; margin-top: 12px; }
+  .btn-primary:active { transform: scale(.98); }
+  .btn-ghost { background: #f3ece3; color: #7a6a58; }
+  .btn-mini { padding: 6px 12px; font-size: 12px; border-radius: 10px; }
+
+  .gender-picker { display: flex; gap: 8px; margin-top: 6px; }
+  .gender-opt {
+    flex: 1; padding: 10px 8px; border-radius: 12px; text-align: center;
+    background: #fdfbf8; border: 2px solid #eee3d6; cursor: pointer;
+    font-size: 13px; color: #7a6a58; transition: .15s;
+  }
+  .gender-opt .g-emoji { display: block; font-size: 22px; margin-bottom: 2px; }
+  .gender-opt.active.girl { border-color: #ff8fab; background: #fff0f4; color: #c2185b; font-weight: 700; }
+  .gender-opt.active.boy { border-color: #5b9bf0; background: #eef5ff; color: #1d5fa8; font-weight: 700; }
+  .gender-opt.active.twins { border-color: #ffc93c; background: #fffaeb; color: #a06800; font-weight: 700; }
+
+  .stage-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 10px; }
+  .stage-tabs button {
+    flex: 0 0 auto; padding: 8px 14px; border-radius: 20px; font-size: 13px;
+    background: #f3ece3; color: #7a6a58; font-weight: 500;
+  }
+  .stage-tabs button.active { background: var(--c2); color: #fff; }
+  .food-item {
+    display: flex; align-items: center; gap: 10px; padding: 10px 0;
+    border-bottom: 1px dashed #f0e7dc;
+  }
+  .food-item:last-child { border-bottom: none; }
+  .food-item .emoji { font-size: 22px; }
+  .food-item .info { flex: 1; }
+  .food-item .name { font-size: 14px; font-weight: 600; }
+  .food-item .desc { font-size: 12px; color: #9b8b78; margin-top: 2px; }
+  .tag { font-size: 11px; padding: 2px 8px; border-radius: 10px; background: #e8f5e9; color: #4caf50; white-space: nowrap; }
+  .tag.warn { background: #fff3e0; color: #ef6c00; }
+  .tag.blue { background: #e3f2fd; color: #1976d2; }
+  .tag.purple { background: #f3e5f5; color: #8e24aa; }
+
+  .focus-card {
+    background: linear-gradient(135deg, var(--c-soft), var(--c-chip));
+    border-radius: 16px; padding: 16px; margin-bottom: 14px;
+    border-left: 4px solid var(--c2);
+  }
+  .focus-card .fc-tag {
+    display: inline-block; background: var(--c2); color: #fff;
+    font-size: 11px; padding: 2px 10px; border-radius: 10px; margin-bottom: 8px;
+    font-weight: 600;
+  }
+  .focus-card .fc-title { font-size: 16px; font-weight: 800; color: #3a3228; margin-bottom: 6px; }
+  .focus-card .fc-desc { font-size: 13px; color: #5a4c3c; line-height: 1.7; }
+  .focus-card .fc-points { margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(0,0,0,.08); }
+  .focus-card .fc-points li {
+    font-size: 12px; color: #7a6a58; line-height: 1.8;
+    list-style: none; padding-left: 16px; position: relative;
+  }
+  .focus-card .fc-points li::before {
+    content: '✓'; position: absolute; left: 0; color: var(--c2); font-weight: 700;
+  }
+
+  .recipe { background: #fdf8f3; border-radius: 14px; padding: 12px; margin-bottom: 10px; }
+  .recipe .r-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .recipe .r-meta { font-size: 12px; color: #9b8b78; margin-bottom: 6px; }
+  .recipe .r-step { font-size: 13px; line-height: 1.6; color: #5a4c3c; }
+
+  .record-item {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding: 10px 0; border-bottom: 1px dashed #f0e7dc; font-size: 13px;
+  }
+  .record-item:last-child { border-bottom: none; }
+  .record-item .r-left { flex: 1; }
+  .record-item .r-date { font-size: 11px; color: #b0a08c; }
+  .record-item .r-food { font-weight: 600; margin: 2px 0; }
+  .record-item .r-note { font-size: 12px; color: #9b8b78; }
+  .record-item .r-supp { font-size: 11px; color: #8e24aa; margin-top: 2px; }
+  .record-item .r-allergy {
+    font-size: 11px; color: #e57373; margin-top: 3px;
+    background: #ffebee; padding: 3px 8px; border-radius: 8px; display: inline-block;
+  }
+  .del-btn { background: none; color: #d9c8b4; font-size: 18px; padding: 0 4px; }
+  .empty { text-align: center; color: #c0b0a0; font-size: 13px; padding: 20px 0; }
+  nav {
+    position: fixed; bottom: 0; left: 0; right: 0; background: #fff;
+    display: flex; border-top: 1px solid #f0e7dc; padding: 6px 0 max(6px, env(safe-area-inset-bottom));
+    box-shadow: 0 -2px 10px rgba(180,150,120,.08);
+  }
+  nav button {
+    flex: 1; background: none; display: flex; flex-direction: column; align-items: center;
+    gap: 2px; font-size: 11px; color: #b0a08c; padding: 6px 0; font-weight: 500;
+  }
+  nav button .ico { font-size: 20px; }
+  nav button.active { color: var(--c2); }
+  .page { display: none; }
+  .page.active { display: block; }
+  .badge { display: inline-block; background: var(--c-chip); color: var(--c-chip-text); font-size: 11px; padding: 2px 8px; border-radius: 10px; margin-left: 6px; }
+  .progress-bar { height: 8px; background: #f3ece3; border-radius: 4px; overflow: hidden; margin-top: 8px; }
+  .progress-bar > div { height: 100%; background: linear-gradient(90deg, var(--c1), var(--c2)); border-radius: 4px; transition: .3s; }
+  .hint { font-size: 12px; color: #9b8b78; line-height: 1.7; margin-top: 8px; }
+  .step-flow { margin-top: 6px; }
+  .step-flow .step { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px dashed #f0e7dc; }
+  .step-flow .step:last-child { border-bottom: none; }
+  .step-flow .num {
+    flex: 0 0 22px; height: 22px; border-radius: 50%; background: var(--c2); color: #fff;
+    font-size: 12px; display: flex; align-items: center; justify-content: center; font-weight: 700;
+  }
+  .step-flow .st { flex: 1; }
+  .step-flow .st .t { font-size: 13px; font-weight: 600; }
+  .step-flow .st .d { font-size: 12px; color: #9b8b78; margin-top: 2px; line-height: 1.5; }
+  .density-box {
+    background: var(--c-soft); border-radius: 12px; padding: 10px 12px; margin-top: 10px;
+    font-size: 12px; color: #7a6a58; line-height: 1.7;
+  }
+  .density-box b { color: var(--c2); }
+  .allergy-item {
+    display: flex; align-items: center; gap: 10px; padding: 12px 0;
+    border-bottom: 1px dashed #f0e7dc;
+  }
+  .allergy-item:last-child { border-bottom: none; }
+  .allergy-item .ai-emoji { font-size: 24px; }
+  .allergy-item .ai-info { flex: 1; }
+  .allergy-item .ai-name { font-size: 14px; font-weight: 600; }
+  .allergy-item .ai-status { font-size: 12px; margin-top: 3px; }
+  .status-done { color: #4caf50; }
+  .status-progress { color: var(--c2); font-weight: 600; }
+  .status-wait { color: #b0a08c; }
+  .status-locked { color: #d0c0b0; }
+  .allergy-actions { display: flex; gap: 6px; flex-direction: column; }
+  .btn-done { background: #e8f5e9; color: #4caf50; }
+  .btn-start { background: var(--c-chip); color: var(--c-chip-text); }
+  .btn-locked { background: #f3ece3; color: #c0b0a0; cursor: not-allowed; }
+  .countdown {
+    display: inline-block; background: #fff3e0; color: #ef6c00;
+    font-size: 11px; padding: 2px 8px; border-radius: 10px; margin-left: 6px;
+  }
+  .allergy-summary {
+    background: linear-gradient(135deg, var(--c-soft), var(--c-chip));
+    border-radius: 14px; padding: 14px; margin-bottom: 12px;
+  }
+  .allergy-summary .as-title { font-size: 15px; font-weight: 700; color: var(--c2); }
+  .allergy-summary .as-desc { font-size: 12px; color: #7a6a58; margin-top: 4px; line-height: 1.6; }
+  .celebrate-overlay {
+    position: fixed; inset: 0; background: rgba(58,50,40,.55);
+    display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px;
+  }
+  .celebrate-overlay.show { display: flex; }
+  .celebrate-box {
+    background: #fff; border-radius: 24px; padding: 28px 22px 22px;
+    text-align: center; max-width: 340px; width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,.2);
+    animation: pop .4s cubic-bezier(.2,1.4,.5,1);
+  }
+  @keyframes pop {
+    0% { transform: scale(.7); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .celebrate-box .cb-emoji { font-size: 52px; margin-bottom: 8px; }
+  .celebrate-box .cb-title { font-size: 19px; font-weight: 800; color: var(--c2); margin-bottom: 10px; }
+  .celebrate-box .cb-desc { font-size: 14px; color: #5a4c3c; line-height: 1.7; margin-bottom: 18px; }
+  .celebrate-box .cb-desc b { color: var(--c2); }
+  .confetti {
+    position: fixed; top: -10px; width: 10px; height: 10px; z-index: 101;
+    animation: fall linear forwards;
+  }
+  @keyframes fall {
+    to { transform: translateY(105vh) rotate(720deg); opacity: 0; }
+  }
+  .cal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .cal-header .cal-title { font-size: 17px; font-weight: 700; }
+  .cal-header .cal-nav { display: flex; gap: 8px; }
+  .cal-header .cal-nav button {
+    background: #f3ece3; color: #7a6a58; width: 34px; height: 34px;
+    padding: 0; border-radius: 50%; font-size: 16px; display: flex;
+    align-items: center; justify-content: center;
+  }
+  .cal-weekdays {
+    display: grid; grid-template-columns: repeat(7, 1fr);
+    text-align: center; font-size: 12px; color: #b0a08c;
+    padding: 6px 0; border-bottom: 1px solid #f0e7dc; margin-bottom: 4px;
+  }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+  .cal-day {
+    min-height: 86px; border-radius: 8px; padding: 4px 3px;
+    display: flex; flex-direction: column; align-items: stretch;
+    position: relative; background: #fdfbf8; cursor: pointer;
+    transition: .15s;
+  }
+  .cal-day:active { background: #f5eee5; }
+  .cal-day.other-month { opacity: .3; }
+  .cal-day.today { background: var(--c-soft); outline: 1.5px solid var(--c1); }
+  .cal-day .d-num {
+    font-size: 12px; font-weight: 600; color: #5a4c3c;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .cal-day .d-foods {
+    flex: 1; display: flex; flex-direction: column; gap: 2px;
+    margin-top: 2px; overflow: hidden;
+  }
+  .cal-food-chip {
+    font-size: 9px; line-height: 1.2; padding: 1px 3px; border-radius: 3px;
+    background: var(--c-chip); color: var(--c-chip-text); white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis;
+  }
+  .cal-food-chip:nth-child(2n) { background: #d9ecff; color: #1d5fa8; }
+  .cal-food-chip:nth-child(3n) { background: #e2f5e0; color: #3a7d34; }
+  .cal-food-chip:nth-child(4n) { background: #f3e5f5; color: #7b2f8e; }
+  .cal-food-chip.more { background: #f0e7dc; color: #9b8b78; }
+  .cal-food-chip.supp { background: #ede7f6; color: #5e35b1; }
+  .cal-legend {
+    display: flex; flex-wrap: wrap; gap: 10px; font-size: 11px;
+    color: #9b8b78; margin-top: 12px; padding-top: 10px; border-top: 1px dashed #f0e7dc;
+  }
+  .cal-legend span { display: flex; align-items: center; gap: 4px; }
+  .cal-legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+  .cal-empty-tip {
+    text-align: center; color: #c0b0a0; font-size: 12px; padding: 16px 0 4px;
+  }
+  nav button.nav-center { position: relative; }
+  nav button.nav-center .ico {
+    background: linear-gradient(135deg, var(--c1), var(--c2)); color: #fff;
+    width: 42px; height: 42px; border-radius: 50%; display: flex;
+    align-items: center; justify-content: center; font-size: 20px;
+    margin-top: -18px; box-shadow: 0 4px 12px var(--c-shadow);
+    border: 3px solid #fff;
+  }
+  nav button.nav-center.active .ico { transform: scale(1.05); }
+
+  /* 折叠区 */
+  .collapse-section {
+    margin-top: 14px; border-top: 1px dashed #f0e7dc; padding-top: 4px;
+  }
+  .collapse-head {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 0; cursor: pointer; user-select: none;
+  }
+  .collapse-head .ch-title {
+    font-size: 13px; font-weight: 600; color: #5a4c3c;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .collapse-head .ch-title .ch-emoji { font-size: 15px; }
+  .collapse-head .ch-arrow {
+    font-size: 14px; color: #b0a08c; transition: transform .2s;
+  }
+  .collapse-head.open .ch-arrow { transform: rotate(180deg); }
+  .collapse-body { display: none; padding-top: 4px; }
+  .collapse-body.open { display: block; }
+
+  /* 我的页菜单 */
+  .menu-list { margin-top: 4px; }
+  .menu-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 4px; border-bottom: 1px dashed #f0e7dc;
+    cursor: pointer;
+  }
+  .menu-item:last-child { border-bottom: none; }
+  .menu-item .mi-emoji { font-size: 20px; }
+  .menu-item .mi-info { flex: 1; }
+  .menu-item .mi-title { font-size: 14px; font-weight: 600; }
+  .menu-item .mi-desc { font-size: 12px; color: #9b8b78; margin-top: 2px; }
+  .menu-item .mi-arrow { color: #c0b0a0; font-size: 16px; }
+
+  /* 免责声明 */
+  .disclaimer {
+    background: #fff8f2; border-radius: 12px; padding: 12px 14px;
+    font-size: 12px; color: #7a6a58; line-height: 1.8;
+  }
+  .disclaimer b { color: #e57373; }
+
+  /* 关于小饭搭子 */
+  .about-box {
+    background: linear-gradient(135deg, var(--c-soft), var(--c-chip));
+    border-radius: 14px; padding: 16px; font-size: 13px;
+    color: #5a4c3c; line-height: 1.9;
+  }
+  .about-box .ab-last {
+    margin-top: 10px; padding-top: 10px;
+    border-top: 1px dashed rgba(0,0,0,.08);
+    color: var(--c2); font-weight: 600;
+  }
+
+  /* 记录页小提示 */
+  .daily-tip {
+    text-align: center; font-size: 12px; color: #b0a08c;
+    padding: 12px 16px 4px; line-height: 1.7;
+    font-style: italic;
+  }
+
+  /* 我的数据页 tab */
+  .data-tabs { display: flex; gap: 6px; margin-bottom: 14px; }
+  .data-tabs button {
+    flex: 1; padding: 10px; font-size: 13px; border-radius: 12px;
+    background: #f3ece3; color: #7a6a58; font-weight: 500;
+  }
+  .data-tabs button.active { background: var(--c2); color: #fff; }
+
+  .report-tabs { display: flex; gap: 6px; margin-bottom: 12px; }
+  .report-tabs button {
+    flex: 1; padding: 8px; font-size: 13px; border-radius: 12px;
+    background: #f3ece3; color: #7a6a58; font-weight: 500;
+  }
+  .report-tabs button.active { background: var(--c2); color: #fff; }
+  .report-summary {
+    background: linear-gradient(135deg, var(--c-soft), var(--c-chip));
+    border-radius: 14px; padding: 14px; margin-bottom: 12px;
+  }
+  .report-summary .rs-big { font-size: 28px; font-weight: 800; color: var(--c2); line-height: 1.1; }
+  .report-summary .rs-desc { font-size: 12px; color: #7a6a58; margin-top: 4px; }
+  .report-summary .rs-sub { font-size: 11px; color: #b0a08c; margin-top: 6px; }
+  .cat-stat {
+    display: flex; align-items: center; gap: 10px; padding: 8px 0;
+    border-bottom: 1px dashed #f0e7dc;
+  }
+  .cat-stat:last-child { border-bottom: none; }
+  .cat-stat .cs-emoji { font-size: 20px; }
+  .cat-stat .cs-info { flex: 1; }
+  .cat-stat .cs-name { font-size: 13px; font-weight: 600; }
+  .cat-stat .cs-bar {
+    height: 6px; background: #f3ece3; border-radius: 3px; overflow: hidden; margin-top: 4px;
+  }
+  .cat-stat .cs-bar > div { height: 100%; border-radius: 3px; transition: .3s; }
+  .cat-stat .cs-count { font-size: 12px; color: #9b8b78; min-width: 44px; text-align: right; }
+  .cat-stat.low .cs-count { color: #e57373; font-weight: 600; }
+  .report-tip {
+    background: var(--c-soft); border-radius: 12px; padding: 10px 12px;
+    font-size: 12px; color: #7a6a58; line-height: 1.7; margin-top: 10px;
+  }
+  .report-tip b { color: var(--c2); }
+  .report-tip .warn { color: #e57373; font-weight: 600; }
+  .supp-cal-grid {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;
+    margin-top: 8px;
+  }
+  .supp-cal-day {
+    aspect-ratio: 1; border-radius: 8px; background: #fdfbf8;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-size: 11px; color: #5a4c3c; position: relative;
+  }
+  .supp-cal-day.other-month { opacity: .25; }
+  .supp-cal-day.today { outline: 1.5px solid var(--c1); }
+  .supp-cal-day .sc-num { font-weight: 600; font-size: 11px; }
+  .supp-cal-day .sc-dot { display: flex; gap: 2px; margin-top: 2px; }
+  .supp-cal-day .sc-dot i { width: 5px; height: 5px; border-radius: 50%; display: block; }
+  .sc-dot i.taken { background: #8e24aa; }
+  .sc-dot i.miss { background: #e0d5c5; }
+  .sc-dot i.extra { background: #4caf50; }
+  .supp-cal-day.has-miss { background: #fff5f5; }
+  .supp-legend {
+    display: flex; gap: 12px; font-size: 11px; color: #9b8b78;
+    margin-top: 10px; padding-top: 10px; border-top: 1px dashed #f0e7dc;
+    flex-wrap: wrap;
+  }
+  .supp-legend span { display: flex; align-items: center; gap: 4px; }
+  .supp-legend i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .supp-stat-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .supp-stat {
+    flex: 1; min-width: 100px; background: #fdf8f3; border-radius: 12px;
+    padding: 10px 12px;
+  }
+  .supp-stat .ss-name { font-size: 12px; color: #7a6a58; font-weight: 600; }
+  .supp-stat .ss-val { font-size: 18px; font-weight: 800; color: #8e24aa; margin-top: 2px; }
+  .supp-stat .ss-sub { font-size: 11px; color: #b0a08c; margin-top: 2px; }
+  .supp-stat.bad .ss-val { color: #e57373; }
+
+  /* 弹窗 */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(58,50,40,.55);
+    display: none; align-items: flex-end; justify-content: center; z-index: 100;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal-box {
+    background: #fff; border-radius: 22px 22px 0 0; padding: 20px 18px max(20px, env(safe-area-inset-bottom));
+    width: 100%; max-width: 520px; max-height: 88vh; overflow-y: auto;
+    animation: slideUp .3s ease;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+  .modal-box .modal-title {
+    font-size: 17px; font-weight: 800; margin-bottom: 4px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .modal-box .modal-sub { font-size: 12px; color: #9b8b78; margin-bottom: 10px; }
+  .modal-close { background: none; color: #b0a08c; font-size: 22px; padding: 0 6px; line-height: 1; }
+  .modal-actions { display: flex; gap: 8px; margin-top: 14px; }
+  .modal-actions button { flex: 1; }
+  .supp-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+  .supp-tag {
+    display: flex; align-items: center; gap: 4px;
+    padding: 8px 12px; border-radius: 12px; font-size: 13px;
+    background: #fff; border: 1.5px solid #eee3d6; color: #7a6a58;
+    cursor: pointer; user-select: none; transition: .15s;
+  }
+  .supp-tag.checked {
+    background: #ede7f6; border-color: #8e24aa; color: #5e35b1; font-weight: 600;
+  }
+  .supp-add-row { display: flex; gap: 8px; margin-top: 8px; }
+  .supp-add-row input { flex: 1; }
+  .supp-add-row button { padding: 10px 14px; font-size: 13px; border-radius: 10px; }
+  .search-box { position: relative; margin-bottom: 12px; }
+  .search-box input { padding-left: 38px; background: #fdfbf8; }
+  .search-box .search-ico {
+    position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+    font-size: 15px; color: #b0a08c; pointer-events: none;
+  }
+  .search-box .search-clear {
+    position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+    background: #e8dccd; color: #7a6a58; width: 22px; height: 22px;
+    border-radius: 50%; font-size: 13px; display: none;
+    align-items: center; justify-content: center; padding: 0; line-height: 1;
+  }
+  .search-box .search-clear.show { display: flex; }
+  .search-hint { font-size: 12px; color: #9b8b78; margin-bottom: 8px; }
+  .search-hint b { color: var(--c2); }
+  .density-check { background: #fdf8f3; border-radius: 14px; padding: 12px; margin-top: 8px; }
+  .density-check .dc-title {
+    font-size: 13px; font-weight: 700; color: #5a4c3c; margin-bottom: 8px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .density-check .dc-score {
+    font-size: 12px; font-weight: 700; padding: 2px 10px; border-radius: 10px;
+  }
+  .dc-score.good { background: #e8f5e9; color: #4caf50; }
+  .dc-score.mid { background: #fff3e0; color: #ef6c00; }
+  .dc-score.low { background: #ffebee; color: #e57373; }
+  .density-cats { display: flex; flex-wrap: wrap; gap: 8px; }
+  .density-cat {
+    display: flex; align-items: center; gap: 4px;
+    padding: 8px 12px; border-radius: 12px; font-size: 13px;
+    background: #fff; border: 1.5px solid #eee3d6; color: #7a6a58;
+    cursor: pointer; user-select: none; transition: .15s;
+  }
+  .density-cat.checked {
+    background: var(--c-chip); border-color: var(--c1); color: var(--c-chip-text); font-weight: 600;
+  }
+  .density-cat .dc-emoji { font-size: 15px; }
+  .density-tip { font-size: 12px; color: #9b8b78; margin-top: 8px; line-height: 1.6; }
+  .density-tip b { color: var(--c2); }
+  .allergy-toggle {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 12px; border-radius: 12px; font-size: 13px;
+    background: #fff; border: 1.5px solid #eee3d6; color: #7a6a58;
+    cursor: pointer; user-select: none; transition: .15s; margin-top: 6px;
+  }
+  .allergy-toggle.checked {
+    background: #ffebee; border-color: #e57373; color: #c62828; font-weight: 600;
+  }
+  .allergy-toggle .at-emoji { font-size: 16px; }
+  .allergy-reasons { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .allergy-reason {
+    padding: 6px 12px; border-radius: 10px; font-size: 12px;
+    background: #fff; border: 1.5px solid #eee3d6; color: #7a6a58;
+    cursor: pointer; user-select: none;
+  }
+  .allergy-reason.checked {
+    background: #ffebee; border-color: #e57373; color: #c62828; font-weight: 600;
+  }
+</style>
+</head>
+<body class="theme-girl">
+
+<header>
+  <h1>🍼 小饭搭子</h1>
+  <p id="headerSub">陪宝宝慢慢学会吃饭</p>
+</header>
+
+<div class="container">
+
+  <!-- ========== 计划页 ========== -->
+  <div class="page active" id="page-plan">
+    <div class="card">
+      <h2><span class="dot"></span>宝宝信息</h2>
+      <label>昵称</label>
+      <input type="text" id="babyName" placeholder="如：小满" oninput="saveBabyInfo()">
+
+      <label>宝宝性别（决定主题色）</label>
+      <div class="gender-picker" id="genderPicker">
+        <div class="gender-opt girl" data-gender="girl" onclick="setGender('girl')">
+          <span class="g-emoji">👧</span>女宝宝
+        </div>
+        <div class="gender-opt boy" data-gender="boy" onclick="setGender('boy')">
+          <span class="g-emoji">👦</span>男宝宝
+        </div>
+        <div class="gender-opt twins" data-gender="twins" onclick="setGender('twins')">
+          <span class="g-emoji">🐥</span>双胞胎
+        </div>
+      </div>
+
+      <label>出生日期</label>
+      <input type="date" id="birthDate">
+      <label>开始添加辅食日期</label>
+      <input type="date" id="startDate">
+      <div class="hint" id="ageHint">设置后可查看当前阶段建议</div>
+    </div>
+
+    <div class="card">
+      <h2><span class="dot"></span>当前阶段</h2>
+      <div id="currentStageBox">
+        <div class="empty">请先设置宝宝出生日期</div>
+      </div>
+    </div>
+
+    <div class="card" id="allergyCard">
+      <h2><span class="dot"></span>排敏追踪器 <span class="badge" id="allergyBadge">0/3</span></h2>
+      <div id="allergyContent"></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="dot"></span>BLW 辅食路线图</h2>
+      <div class="step-flow" id="routeFlow"></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="dot"></span>辅食添加顺序</h2>
+      <div class="stage-tabs" id="stageTabs"></div>
+      <div id="foodList"></div>
+      <div class="hint">💡 每次只添加一种新食物，观察 2-3 天无过敏反应后再添加下一种。</div>
+    </div>
+  </div>
+
+  <!-- ========== 记录页 ========== -->
+  <div class="page" id="page-record">
+    <div class="card">
+      <h2><span class="dot"></span>添加辅食记录</h2>
+      <label>日期</label>
+      <input type="date" id="recDate">
+      <label>吃了什么（用 + 或 、分隔，可自动拆分到日历）</label>
+      <input type="text" id="recFood" placeholder="如：馒头 + 牛肉 + 南瓜 + 苹果">
+
+      <label style="margin-top:14px">补剂</label>
+      <div class="supp-tags" id="suppTags"></div>
+      <div class="supp-add-row">
+        <input type="text" id="suppInput" placeholder="添加其他补剂，如：铁剂、益生菌">
+        <button class="btn-ghost" onclick="addSuppOption()">添加</button>
+      </div>
+
+      <!-- 折叠：营养密度 -->
+      <div class="collapse-section">
+        <div class="collapse-head" onclick="toggleCollapse('density', this)">
+          <div class="ch-title"><span class="ch-emoji">🥗</span>营养密度检查（可选）</div>
+          <div class="ch-arrow">⌄</div>
+        </div>
+        <div class="collapse-body" id="collapse-density">
+          <div class="density-check">
+            <div class="dc-title">
+              <span>本餐食物类别</span>
+              <span class="dc-score low" id="dcScore">0 / 5 种</span>
+            </div>
+            <div class="density-cats" id="densityCats"></div>
+            <div class="density-tip" id="densityTip">建议每餐包含 4-5 种，营养更均衡。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 折叠：进食量 -->
+      <div class="collapse-section">
+        <div class="collapse-head" onclick="toggleCollapse('amount', this)">
+          <div class="ch-title"><span class="ch-emoji">🍽️</span>进食量（可选）</div>
+          <div class="ch-arrow">⌄</div>
+        </div>
+        <div class="collapse-body" id="collapse-amount">
+          <select id="recAmount">
+            <option value="少量尝试">少量尝试</option>
+            <option value="半碗">半碗</option>
+            <option value="一碗">一碗</option>
+            <option value="拒绝">拒绝</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 折叠：过敏 -->
+      <div class="collapse-section">
+        <div class="collapse-head" onclick="toggleCollapse('allergy', this)">
+          <div class="ch-title"><span class="ch-emoji">⚠️</span>过敏反应（可选）</div>
+          <div class="ch-arrow">⌄</div>
+        </div>
+        <div class="collapse-body" id="collapse-allergy">
+          <div class="allergy-toggle" id="allergyToggle" onclick="toggleAllergy()">
+            <span class="at-emoji">⚠️</span>
+            <span>疑似过敏（勾选后会汇总到排敏追踪器）</span>
+          </div>
+          <div class="allergy-reasons" id="allergyReasons" style="display:none"></div>
+        </div>
+      </div>
+
+      <!-- 折叠：备注 -->
+      <div class="collapse-section">
+        <div class="collapse-head" onclick="toggleCollapse('note', this)">
+          <div class="ch-title"><span class="ch-emoji">📝</span>反应 / 备注（可选）</div>
+          <div class="ch-arrow">⌄</div>
+        </div>
+        <div class="collapse-body" id="collapse-note">
+          <textarea id="recNote" rows="2" placeholder="如：无过敏，便便正常，抓握很好"></textarea>
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="addRecord()">保存记录</button>
+    </div>
+
+    <!-- 每日小提示 -->
+    <div class="daily-tip" id="dailyTip"></div>
+  </div>
+
+  <!-- ========== 日历页 ========== -->
+  <div class="page" id="page-calendar">
+    <div class="card">
+      <div class="cal-header">
+        <div class="cal-title" id="calTitle">2026年9月</div>
+        <div class="cal-nav">
+          <button onclick="changeMonth(-1)">‹</button>
+          <button onclick="changeMonth(1)">›</button>
+        </div>
+      </div>
+      <div class="cal-weekdays">
+        <div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div><div>日</div>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+      <div class="cal-legend">
+        <span><i style="background:var(--c-chip)"></i>辅食</span>
+        <span><i style="background:#ede7f6"></i>补剂</span>
+        <span><i style="background:var(--c-soft);outline:1.5px solid var(--c1)"></i>今天</span>
+      </div>
+      <div class="cal-empty-tip" id="calEmptyTip" style="display:none">
+        这个月还没有记录，去「记录」页添加吧～
+      </div>
+      <div class="hint" style="text-align:center;margin-top:10px">💡 点击某一天可查看或删除当天记录</div>
+    </div>
+  </div>
+
+  <!-- ========== 食谱页 ========== -->
+  <div class="page" id="page-recipe">
+    <div class="focus-card" id="focusCard">
+      <div class="fc-tag" id="fcTag">当前阶段</div>
+      <div class="fc-title" id="fcTitle">加载中...</div>
+      <div class="fc-desc" id="fcDesc"></div>
+      <ul class="fc-points" id="fcPoints"></ul>
+    </div>
+
+    <div class="card">
+      <h2><span class="dot"></span>食谱搜索</h2>
+      <div class="search-box">
+        <span class="search-ico">🔍</span>
+        <input type="text" id="recipeSearch" placeholder="输入食材或菜名，如：南瓜、蒸糕、蛋饼"
+               oninput="onSearchInput()">
+        <button class="search-clear" id="searchClear" onclick="clearSearch()">×</button>
+      </div>
+      <div class="search-hint" id="searchHint"></div>
+      <div id="searchResultList"></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="dot"></span>当前阶段食谱建议</h2>
+      <div class="hint" style="margin-top:0" id="recipeHint">根据当前阶段推荐简单易做的辅食</div>
+      <div id="recipeList" style="margin-top:12px"></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="dot"></span>营养密度搭配</h2>
+      <div class="density-box">
+        <b>每餐目标 4-5 种食物</b><br>
+        建议组合：主食 + 蛋白质 + 蔬菜 + 水果 + 健康脂肪<br><br>
+        示例：软米饭 + 牛肉末 + 西兰花 + 牛油果 + 少量核桃油<br>
+        示例：蒸糕 + 蛋黄 + 南瓜 + 蓝莓 + 酸奶
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 我的页 ========== -->
+  <div class="page" id="page-me">
+    <div class="card">
+      <h2><span class="dot"></span>宝宝信息</h2>
+      <div id="meBabyInfo"></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="dot"></span>设置</h2>
+      <div class="menu-list">
+        <div class="menu-item" onclick="openDataPage()">
+          <div class="mi-emoji">📊</div>
+          <div class="mi-info">
+            <div class="mi-title">我的数据</div>
+            <div class="mi-desc">营养密度周报 · 补剂打卡日历</div>
+          </div>
+          <div class="mi-arrow">›</div>
+        </div>
+        <div class="menu-item" onclick="openSuppManage()">
+          <div class="mi-emoji">💊</div>
+          <div class="mi-info">
+            <div class="mi-title">补剂选项管理</div>
+            <div class="mi-desc">添加或删除补剂名称</div>
+          </div>
+          <div class="mi-arrow">›</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="dot"></span>数据管理</h2>
+      <div class="hint" style="margin-top:0">数据保存在本机浏览器，清除缓存会丢失。</div>
+      <button class="btn-ghost" style="width:100%;margin-top:12px" onclick="exportData()">导出数据（JSON）</button>
+      <button class="btn-ghost" style="width:100%;margin-top:8px;color:#e57373" onclick="clearAll()">清空所有数据</button>
+    </div>
+
+    <div class="card">
+      <h2><span class="dot"></span>关于小饭搭子</h2>
+      <div class="about-box">
+        我们相信，宝宝知道自己吃多少。<br>
+        大人负责提供合适的食物，宝宝负责决定吃不吃、吃多少。<br>
+        手抓、玩食物、吃得满脸都是，都是学习的过程。<br>
+        喂养不是任务，是陪着宝宝慢慢学会吃饭。
+        <div class="ab-last">
+          吃得少的一天，不代表失败。<br>
+          奶仍然是主食，辅食是练习。<br>
+          你做得已经很好了。
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="dot"></span>免责声明</h2>
+      <div class="disclaimer">
+        本 App 提供的辅食建议、食材顺序、月龄参考均基于公开的 BLW（Baby-Led Weaning）喂养理念整理，<b>仅供家长参考</b>，不构成任何医疗、营养或专业诊断建议。<br><br>
+        每个宝宝的发育节奏不同，添加辅食前请咨询儿科医生或专业营养师。如宝宝出现严重过敏反应（呼吸困难、面部肿胀、持续呕吐等），请<b>立即就医</b>。<br><br>
+        使用本 App 产生的任何后果由使用者自行承担。
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 我的数据页 ========== -->
+  <div class="page" id="page-data">
+    <div class="card">
+      <h2><span class="dot"></span>我的数据</h2>
+      <div class="data-tabs">
+        <button class="active" data-tab="report" onclick="switchDataTab('report', this)">🥗 营养密度</button>
+        <button data-tab="supp" onclick="switchDataTab('supp', this)">💊 补剂打卡</button>
+      </div>
+
+      <div id="dataTab-report">
+        <div class="report-tabs">
+          <button class="active" data-week="0" onclick="setReportWeek(0, this)">本周</button>
+          <button data-week="-1" onclick="setReportWeek(-1, this)">上周</button>
+        </div>
+        <div id="reportContent"></div>
+      </div>
+
+      <div id="dataTab-supp" style="display:none">
+        <div class="cal-header">
+          <div class="cal-title" id="suppCalTitle">2026年9月</div>
+          <div class="cal-nav">
+            <button onclick="changeSuppMonth(-1)">‹</button>
+            <button onclick="changeSuppMonth(1)">›</button>
+          </div>
+        </div>
+        <div class="cal-weekdays">
+          <div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div><div>日</div>
+        </div>
+        <div class="supp-cal-grid" id="suppCalGrid"></div>
+        <div class="supp-legend">
+          <span><i class="taken" style="background:#8e24aa"></i>已打卡</span>
+          <span><i class="miss" style="background:#e0d5c5"></i>漏打卡</span>
+          <span><i class="extra" style="background:#4caf50"></i>额外补剂</span>
+        </div>
+        <div class="supp-stat-row" id="suppStatRow"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 底部导航 -->
+<nav>
+  <button class="active" data-page="plan" onclick="switchPage('plan', this)"><span class="ico">📋</span>计划</button>
+  <button data-page="record" onclick="switchPage('record', this)"><span class="ico">📝</span>记录</button>
+  <button class="nav-center" data-page="calendar" onclick="switchPage('calendar', this)"><span class="ico">📅</span>日历</button>
+  <button data-page="recipe" onclick="switchPage('recipe', this)"><span class="ico">🍲</span>食谱</button>
+  <button data-page="me" onclick="switchPage('me', this)"><span class="ico">👤</span>我的</button>
+</nav>
+
+<!-- 庆祝弹窗 -->
+<div class="celebrate-overlay" id="celebrateOverlay">
+  <div class="celebrate-box">
+    <div class="cb-emoji">🎉</div>
+    <div class="cb-title">恭喜你！</div>
+    <div class="cb-desc">
+      已完成基础的排敏工作，<br>
+      让我们开始做<b>更丰富的辅食</b>吧！<br><br>
+      接下来可以尝试：<br>
+      米饼抓握 · 蒸糕 · 馒头 · 块状食物
+    </div>
+    <button class="btn-primary" style="margin-top:0" onclick="closeCelebrate()">开始新阶段 →</button>
+  </div>
+</div>
+
+<!-- 日历某天记录弹窗 -->
+<div class="modal-overlay" id="dayModal">
+  <div class="modal-box">
+    <div class="modal-title">
+      <span id="dayModalTitle">当天记录</span>
+      <button class="modal-close" onclick="closeDayModal()">×</button>
+    </div>
+    <div id="dayModalContent"></div>
+  </div>
+</div>
+
+<!-- 补剂管理弹窗 -->
+<div class="modal-overlay" id="suppManageModal">
+  <div class="modal-box">
+    <div class="modal-title">
+      <span>💊 补剂选项管理</span>
+      <button class="modal-close" onclick="closeSuppManage()">×</button>
+    </div>
+    <div class="modal-sub">默认包含 AD 和 D3，可自行添加其他补剂</div>
+    <div id="suppManageList" style="margin-top:10px"></div>
+    <div class="supp-add-row">
+      <input type="text" id="suppManageInput" placeholder="如：铁剂、益生菌">
+      <button class="btn-ghost" onclick="addSuppFromManage()">添加</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================= 常量 ================= */
+const ROUTE = [
+  { t:'6月龄 第1-2周', d:'强化铁米粉适应，学习吞咽和勺喂' },
+  { t:'6月龄 适应后', d:'开始排敏：蛋黄 → 根茎类蔬菜 → 红肉泥，每次一种，观察2-3天' },
+  { t:'6.5月龄', d:'引入米饼 / 原味手指泡芙，引导宝宝抓握' },
+  { t:'7月龄', d:'开始尝试蒸糕（蔬菜蒸糕、蛋黄蒸糕）' },
+  { t:'8月龄', d:'尝试馒头（撕小块）+ 蒸烂的蔬菜条/块' },
+  { t:'9月龄+', d:'剪碎的肉类、蛋饼、块状食物，提高营养密度，每餐4-5种' }
+];
+
+const ALLERGY_FOODS = [
+  { id:'yolk', emoji:'🥚', name:'蛋黄', desc:'从1/4开始，压泥调稀', days:3 },
+  { id:'root', emoji:'🎃', name:'根茎类蔬菜', desc:'南瓜/胡萝卜/土豆/红薯，蒸熟压泥', days:3 },
+  { id:'meat', emoji:'🥩', name:'红肉泥', desc:'猪/牛肉煮熟打泥，补铁关键', days:3 }
+];
+
+const DENSITY_CATS = [
+  { id:'staple', emoji:'🍚', name:'主食' },
+  { id:'protein', emoji:'🥩', name:'蛋白质' },
+  { id:'veggie', emoji:'🥦', name:'蔬菜' },
+  { id:'fruit', emoji:'🍎', name:'水果' },
+  { id:'fat', emoji:'🥑', name:'健康脂肪' }
+];
+
+const ALLERGY_REASONS = ['皮疹', '呕吐', '腹泻', '呼吸急促', '哭闹不止', '拒食', '便便异常'];
+const DEFAULT_SUPPS = ['AD', 'D3'];
+
+/* 每日小提示 */
+const DAILY_TIPS = [
+  '今天吃得少也没关系，奶还是主食。',
+  '宝宝的胃口每天都不一样，不用跟昨天比。',
+  '一顿不吃不代表不爱吃，可能只是今天不饿。',
+  '宝宝玩食物，也是在认识食物。',
+  '扔、捏、糊一脸，都是探索的一部分。',
+  '手抓着吃，是她现在最擅长的进食方式。',
+  '干呕是保护反射，不是噎住，别慌。',
+  '宝宝咳几下把食物推出来，是正常的。',
+  '真正噎住的表现是：发不出声、脸发紫，那时才需要干预。',
+  '辅食不是比赛，不用跟别人比进度。',
+  '每个宝宝准备好自己吃饭的时间都不一样。',
+  '你顺着她的信号走，就是最好的节奏。'
+];
+
+const STAGE_FOCUS = {
+  s1: {
+    tag: '6月龄 · 适应期',
+    title: '先适应米粉，再开始排敏',
+    desc: '这一阶段的目标是让宝宝学习吞咽和接受勺喂，同时开始接触第一种新食物。',
+    points: [
+      '第1-2周：强化铁米粉，稀糊状，从1-2勺开始',
+      '适应后：蛋黄（1/4个起）→ 根茎类蔬菜 → 红肉泥',
+      '每次只加一种新食物，观察2-3天',
+      '新食物安排在上午，方便观察过敏'
+    ]
+  },
+  s2: {
+    tag: '6.5月龄 · 手指食物',
+    title: '开始引导抓握，练习自主进食',
+    desc: '从泥糊过渡到手指食物，让宝宝自己拿着吃，锻炼手眼协调和咀嚼。',
+    points: [
+      '原味米饼、手指泡芙，入口即化',
+      '蒸软南瓜条、西兰花小朵，方便抓握',
+      '全程坐餐椅，大人看护',
+      '允许宝宝玩食物、探索质地'
+    ]
+  },
+  s3: {
+    tag: '7月龄 · 蒸糕',
+    title: '从泥糊升级到蒸糕，练习咀嚼',
+    desc: '蒸糕软嫩有形状，是泥糊到块状食物的过渡，也是锻炼咀嚼的好选择。',
+    points: [
+      '蔬菜蒸糕、蛋黄蒸糕、红薯蒸糕',
+      '切成长条，方便宝宝抓握',
+      '继续补铁：红肉泥可拌入蒸糕',
+      '引入牛油果条、香蕉块等软质水果'
+    ]
+  },
+  s4: {
+    tag: '8月龄 · 咀嚼进阶',
+    title: '馒头 + 蒸烂蔬菜，锻炼咀嚼',
+    desc: '食物颗粒变大，开始尝试撕碎的馒头和蒸到一压就烂的蔬菜块。',
+    points: [
+      '无糖馒头撕成小块，练习咀嚼',
+      '胡萝卜、西兰花、南瓜蒸到一压就烂',
+      '肉末拌粥，提高铁和蛋白',
+      '蒸苹果块等温和水果'
+    ]
+  },
+  s5: {
+    tag: '9月龄+ · 营养密度',
+    title: '块状食物 + 每餐4-5种搭配',
+    desc: '食物接近家庭餐，重点提高每餐的营养密度，让宝宝吃到更多种类。',
+    points: [
+      '剪碎的肉类、蛋饼、块状蔬菜',
+      '每餐凑齐4-5种：主食+蛋白质+蔬菜+水果+健康脂肪',
+      '鼓励自主进食，不强迫',
+      '1岁内不加盐、不加糖、不喝蜂蜜'
+    ]
+  }
+};
+
+const STAGES = [
+  {
+    id: 's1', name: '6月龄', ageRange: [6, 6.5],
+    desc: '米粉适应期 + 排敏启动',
+    foods: [
+      { emoji:'🥣', name:'强化铁米粉', desc:'第1-2周适应，稀糊状，学习吞咽', tag:'适应期', cls:'' },
+      { emoji:'🥚', name:'蛋黄', desc:'排敏第1种，从1/4开始，压泥调稀', tag:'排敏①', cls:'warn' },
+      { emoji:'🎃', name:'南瓜泥', desc:'根茎类，蒸熟压泥', tag:'排敏②', cls:'' },
+      { emoji:'🥕', name:'胡萝卜泥', desc:'根茎类，蒸熟打泥', tag:'排敏②', cls:'' },
+      { emoji:'🥔', name:'土豆泥', desc:'根茎类，蒸熟压泥可加奶调稀', tag:'排敏②', cls:'' },
+      { emoji:'🍠', name:'红薯泥', desc:'根茎类，蒸熟压泥', tag:'排敏②', cls:'' },
+      { emoji:'🥩', name:'红肉泥', desc:'猪/牛肉煮熟打泥，补铁关键', tag:'排敏③', cls:'warn' }
+    ]
+  },
+  {
+    id: 's2', name: '6.5月龄', ageRange: [6.5, 7],
+    desc: '引入手指食物，引导抓握',
+    foods: [
+      { emoji:'🍘', name:'原味米饼', desc:'无盐无糖，入口即化，练习抓握', tag:'手指食物', cls:'blue' },
+      { emoji:'🥜', name:'原味手指泡芙', desc:'选无糖无盐款，锻炼捏取', tag:'手指食物', cls:'blue' },
+      { emoji:'🎃', name:'蒸软南瓜条', desc:'切条蒸软，方便抓握', tag:'手指食物', cls:'blue' },
+      { emoji:'🥦', name:'西兰花小朵', desc:'蒸软后给宝宝抓握啃咬', tag:'手指食物', cls:'blue' },
+      { emoji:'🥣', name:'米粉 / 泥糊', desc:'继续保留，保证铁摄入', tag:'基础', cls:'' }
+    ]
+  },
+  {
+    id: 's3', name: '7月龄', ageRange: [7, 8],
+    desc: '开始尝试蒸糕，质地升级',
+    foods: [
+      { emoji:'🍰', name:'蔬菜蒸糕', desc:'南瓜/胡萝卜+面粉+蛋黄蒸制，切条', tag:'蒸糕', cls:'purple' },
+      { emoji:'🥚', name:'蛋黄蒸糕', desc:'蛋黄+米粉/面粉蒸成糕，软嫩', tag:'蒸糕', cls:'purple' },
+      { emoji:'🍠', name:'红薯蒸糕', desc:'红薯泥+面粉蒸制，天然甜味', tag:'蒸糕', cls:'purple' },
+      { emoji:'🥩', name:'红肉泥 / 肉末', desc:'继续补铁，可拌入蒸糕', tag:'蛋白质', cls:'warn' },
+      { emoji:'🥑', name:'牛油果条', desc:'切条直接抓握，优质脂肪', tag:'手指食物', cls:'blue' },
+      { emoji:'🍌', name:'香蕉块', desc:'熟透香蕉切段，软糯易抓', tag:'水果', cls:'' }
+    ]
+  },
+  {
+    id: 's4', name: '8月龄', ageRange: [8, 9],
+    desc: '馒头 + 蒸烂蔬菜，咀嚼进阶',
+    foods: [
+      { emoji:'🍞', name:'馒头（撕小块）', desc:'无糖馒头撕成小块，练习咀嚼', tag:'主食', cls:'' },
+      { emoji:'🥕', name:'蒸烂胡萝卜块', desc:'蒸至一压就烂，切块抓握', tag:'蔬菜', cls:'' },
+      { emoji:'🥦', name:'蒸烂西兰花', desc:'花朵部分蒸软，方便啃咬', tag:'蔬菜', cls:'' },
+      { emoji:'🎃', name:'蒸烂南瓜块', desc:'软烂甜糯，手指食物', tag:'蔬菜', cls:'' },
+      { emoji:'🥩', name:'肉末拌粥', desc:'红肉末+粥，提高铁和蛋白', tag:'蛋白质', cls:'warn' },
+      { emoji:'🥚', name:'蛋黄碎', desc:'煮熟蛋黄压碎，可拌入蔬菜', tag:'蛋白质', cls:'warn' },
+      { emoji:'🍎', name:'蒸苹果块', desc:'蒸软切块，温和好抓', tag:'水果', cls:'' }
+    ]
+  },
+  {
+    id: 's5', name: '9月龄+', ageRange: [9, 36],
+    desc: '剪碎肉类、蛋饼、块状食物，提高营养密度',
+    foods: [
+      { emoji:'✂️', name:'剪碎的肉类', desc:'鸡肉/猪肉/牛肉剪碎，锻炼咀嚼', tag:'蛋白质', cls:'warn' },
+      { emoji:'🥞', name:'蛋饼', desc:'蛋黄/全蛋+蔬菜煎成小饼，切条', tag:'蛋白质', cls:'warn' },
+      { emoji:'🍚', name:'软米饭', desc:'搭配菜肉，逐步过渡', tag:'主食', cls:'' },
+      { emoji:'🥟', name:'小馄饨 / 小饺子', desc:'皮薄馅细，煮软剪小', tag:'主食', cls:'' },
+      { emoji:'🥦', name:'块状蔬菜', desc:'胡萝卜、西葫芦、花菜切块蒸熟', tag:'蔬菜', cls:'' },
+      { emoji:'🐟', name:'鱼块', desc:'选刺少的鱼，蒸熟去刺切块', tag:'蛋白质', cls:'warn' },
+      { emoji:'🍓', name:'水果块', desc:'草莓、蓝莓压扁，防噎', tag:'水果', cls:'' },
+      { emoji:'🥜', name:'坚果酱（薄涂）', desc:'花生酱薄涂面包，注意过敏', tag:'高致敏', cls:'warn' }
+    ]
+  }
+];
+
+const RECIPES = {
+  s1: [
+    { title:'强化铁米粉糊', meta:'6月龄 第1-2周 · 5分钟', step:'1. 取1勺米粉放入碗中。\n2. 加入40-50℃母乳/配方奶或温水。\n3. 边加边搅拌至顺滑无颗粒。\n4. 初次调稀，从1-2勺开始，适应1-2周。' },
+    { title:'蛋黄泥（排敏第1种）', meta:'6月龄 适应后 · 10分钟', step:'1. 鸡蛋冷水下锅煮10分钟。\n2. 取1/4蛋黄压碎。\n3. 加温水或奶调成泥。\n4. 观察2-3天无过敏再增量。' },
+    { title:'南瓜泥（根茎类排敏）', meta:'6月龄 · 15分钟', step:'1. 南瓜去皮去籽切块。\n2. 蒸10-12分钟至软烂。\n3. 压泥或打泥。\n4. 太稠加少量温水调稀。' },
+    { title:'红肉泥（排敏第3种）', meta:'6月龄 · 20分钟', step:'1. 猪里脊/牛里脊切小块。\n2. 冷水下锅煮熟去浮沫。\n3. 加少量煮肉汤打成细腻肉泥。\n4. 可拌入米粉中喂食。' }
+  ],
+  s2: [
+    { title:'原味米饼抓握练习', meta:'6.5月龄 · 即食', step:'1. 选无盐无糖原味米饼。\n2. 让宝宝自己抓握。\n3. 大人全程看护，坐餐椅。\n4. 米饼入口即化，适合入门手指食物。' },
+    { title:'蒸软南瓜条', meta:'6.5月龄 · 15分钟', step:'1. 南瓜切手指粗细长条。\n2. 蒸10-12分钟至软而不烂。\n3. 放温至不烫手。\n4. 让宝宝自己抓着吃。' },
+    { title:'西兰花小朵', meta:'6.5月龄 · 12分钟', step:'1. 西兰花掰成小朵。\n2. 蒸8-10分钟至软。\n3. 放温，花朵部分朝上递给宝宝。\n4. 方便抓握和啃咬。' }
+  ],
+  s3: [
+    { title:'南瓜蔬菜蒸糕', meta:'7月龄 · 25分钟', step:'1. 南瓜蒸熟压泥，加1个蛋黄。\n2. 加2勺面粉/米粉拌匀。\n3. 倒入模具，盖保鲜膜扎孔。\n4. 水开蒸15分钟，切条给抓握。' },
+    { title:'蛋黄蒸糕', meta:'7月龄 · 20分钟', step:'1. 蛋黄1个打散。\n2. 加2勺米粉/面粉和少量水。\n3. 拌匀倒入小碗。\n4. 蒸12-15分钟，切小块。' },
+    { title:'红薯蒸糕', meta:'7月龄 · 25分钟', step:'1. 红薯蒸熟压泥。\n2. 加蛋黄和少量面粉。\n3. 拌匀入模，蒸15分钟。\n4. 切条，天然甜味宝宝爱。' }
+  ],
+  s4: [
+    { title:'馒头小块', meta:'8月龄 · 5分钟', step:'1. 选无糖馒头。\n2. 撕成小拇指大小。\n3. 可稍微蒸软。\n4. 让宝宝自己抓着吃，练习咀嚼。' },
+    { title:'蒸烂蔬菜块', meta:'8月龄 · 15分钟', step:'1. 胡萝卜/南瓜/西葫芦切块。\n2. 蒸12-15分钟至一压就烂。\n3. 放温。\n4. 搭配馒头一起给。' },
+    { title:'肉末蔬菜粥', meta:'8月龄 · 25分钟', step:'1. 大米煮成稠粥。\n2. 红肉剁末炒熟。\n3. 蔬菜切碎焯熟。\n4. 拌入粥中，提高营养密度。' }
+  ],
+  s5: [
+    { title:'蔬菜蛋饼', meta:'9月龄+ · 15分钟', step:'1. 蛋黄/全蛋打散。\n2. 加切碎的蔬菜和少量面粉。\n3. 平底锅少油，小火煎成薄饼。\n4. 切条，让宝宝自己拿着吃。' },
+    { title:'剪碎肉末拌饭', meta:'9月龄+ · 20分钟', step:'1. 鸡肉/牛肉煮熟或炒熟。\n2. 用剪刀剪碎。\n3. 搭配软米饭和蔬菜。\n4. 可加少量高汤拌匀。' },
+    { title:'五彩营养餐', meta:'9月龄+ · 25分钟', step:'1. 主食：软米饭/面条。\n2. 蛋白质：剪碎肉/鱼/蛋饼。\n3. 蔬菜：块状蒸熟蔬菜。\n4. 水果+健康脂肪（牛油果/核桃油）。\n5. 每餐凑齐4-5种食物。' }
+  ]
+};
+
+/* ================= 工具 ================= */
+const $ = id => document.getElementById(id);
+const todayStr = () => {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+};
+const store = {
+  get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch(e){ return d; } },
+  set(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
+};
+
+/* ================= 主题 ================= */
+function applyTheme(gender) {
+  document.body.classList.remove('theme-girl', 'theme-boy', 'theme-twins');
+  if (gender === 'boy') document.body.classList.add('theme-boy');
+  else if (gender === 'twins') document.body.classList.add('theme-twins');
+  else document.body.classList.add('theme-girl');
+  document.querySelectorAll('.gender-opt').forEach(el => {
+    el.classList.toggle('active', el.dataset.gender === gender);
+  });
+}
+function setGender(gender) {
+  store.set('baby_gender', gender);
+  applyTheme(gender);
+  saveBabyInfo();
+}
+
+/* ================= 页面切换 ================= */
+function switchPage(page, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  $('page-' + page).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (page === 'recipe') { renderRecipes(); renderSearch(); renderFocus(); }
+  if (page === 'record') { renderSuppTags(); renderDailyTip(); }
+  if (page === 'plan') renderAllergy();
+  if (page === 'calendar') renderCalendar();
+  if (page === 'me') renderMeBabyInfo();
+}
+function openDataPage() {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  $('page-data').classList.add('active');
+  renderReport();
+  renderSuppCalendar();
+}
+
+/* 每日小提示 */
+function renderDailyTip() {
+  const tip = DAILY_TIPS[Math.floor(Math.random() * DAILY_TIPS.length)];
+  $('dailyTip').textContent = '— ' + tip;
+}
+
+/* ================= 月龄计算 ================= */
+function getAgeMonths() {
+  const b = $('birthDate').value;
+  if (!b) return null;
+  const birth = new Date(b), now = new Date();
+  let m = (now.getFullYear() - birth.getFullYear()) * 12 + (now.getMonth() - birth.getMonth());
+  const dayDiff = now.getDate() - birth.getDate();
+  if (dayDiff < 0) m--;
+  const frac = dayDiff >= 0 ? dayDiff / 30 : (30 + dayDiff) / 30;
+  return Math.max(0, m + frac);
+}
+function getCurrentStage() {
+  const age = getAgeMonths();
+  if (age === null) return null;
+  for (const s of STAGES) {
+    if (age >= s.ageRange[0] && age < s.ageRange[1]) return s;
+  }
+  if (age >= 36) return STAGES[STAGES.length - 1];
+  return null;
+}
+function renderCurrentStage() {
+  const box = $('currentStageBox');
+  const age = getAgeMonths();
+  if (age === null) {
+    box.innerHTML = '<div class="empty">请先设置宝宝出生日期</div>';
+    $('ageHint').textContent = '设置后可查看当前阶段建议';
+    return;
+  }
+  $('ageHint').textContent = `宝宝当前约 ${age.toFixed(1)} 个月`;
+  const stage = getCurrentStage();
+  if (!stage) {
+    box.innerHTML = `<div class="empty">宝宝还不到 6 个月，建议以母乳/配方奶为主，满 6 个月再开始添加辅食。</div>`;
+    return;
+  }
+  const pct = Math.min(100, (age - stage.ageRange[0]) / (stage.ageRange[1] - stage.ageRange[0]) * 100);
+  box.innerHTML = `
+    <div style="font-size:15px;font-weight:700;margin-bottom:4px">${stage.name} · ${stage.desc}</div>
+    <div class="progress-bar"><div style="width:${pct}%"></div></div>
+    <div class="hint">当前阶段重点：${stage.desc}</div>
+  `;
+}
+
+function saveBabyInfo() {
+  store.set('baby_name', $('babyName').value.trim());
+  store.set('baby_birth', $('birthDate').value);
+  store.set('baby_start', $('startDate').value);
+}
+
+function renderMeBabyInfo() {
+  const name = store.get('baby_name', '');
+  const birth = store.get('baby_birth', '');
+  const gender = store.get('baby_gender', 'girl');
+  const genderText = gender === 'boy' ? '👦 男宝宝' : gender === 'twins' ? '🐥 双胞胎' : '👧 女宝宝';
+  const age = getAgeMonths();
+  const ageText = age !== null ? `约 ${age.toFixed(1)} 个月` : '未设置出生日期';
+  $('meBabyInfo').innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px;padding:8px 0">
+      <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--c1),var(--c2));color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700">
+        ${(name || '宝')[0]}
+      </div>
+      <div style="flex:1">
+        <div style="font-size:16px;font-weight:700">${name || '未命名'}</div>
+        <div style="font-size:12px;color:#9b8b78;margin-top:2px">${genderText} · ${ageText}</div>
+        <div style="font-size:12px;color:#b0a08c;margin-top:2px">${birth ? '出生：' + birth : ''}</div>
+      </div>
+    </div>
+    <div class="hint" style="margin-top:8px">如需修改，请到「计划」页编辑</div>
+  `;
+}
+
+/* ================= 路线图 ================= */
+function renderRoute() {
+  $('routeFlow').innerHTML = ROUTE.map((r, i) => `
+    <div class="step">
+      <div class="num">${i+1}</div>
+      <div class="st">
+        <div class="t">${r.t}</div>
+        <div class="d">${r.d}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ================= 本阶段重点 ================= */
+function renderFocus() {
+  const stage = getCurrentStage();
+  if (!stage) {
+    $('fcTag').textContent = '尚未设置';
+    $('fcTitle').textContent = '请先在「计划」页设置宝宝出生日期';
+    $('fcDesc').textContent = '';
+    $('fcPoints').innerHTML = '';
+    return;
+  }
+  const f = STAGE_FOCUS[stage.id];
+  if (!f) return;
+  $('fcTag').textContent = f.tag;
+  $('fcTitle').textContent = f.title;
+  $('fcDesc').textContent = f.desc;
+  $('fcPoints').innerHTML = f.points.map(p => `<li>${p}</li>`).join('');
+}
+
+/* ================= 折叠区 ================= */
+function toggleCollapse(key, headEl) {
+  const body = $('collapse-' + key);
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  headEl.classList.toggle('open', !isOpen);
+}
+
+/* ================= 排敏追踪器 ================= */
+function getAllergyState() { return store.get('baby_allergy', {}); }
+function saveAllergyState(state) { store.set('baby_allergy', state); }
+function startAllergy(foodId) {
+  const state = getAllergyState();
+  const food = ALLERGY_FOODS.find(f => f.id === foodId);
+  state[foodId] = { startDate: todayStr(), days: food.days, status: 'progress' };
+  saveAllergyState(state);
+  renderAllergy();
+}
+function completeAllergy(foodId) {
+  const state = getAllergyState();
+  if (state[foodId]) {
+    state[foodId].status = 'done';
+    state[foodId].doneDate = todayStr();
+  }
+  saveAllergyState(state);
+  renderAllergy();
+  checkAllergyComplete();
+}
+function resetAllergy(foodId) {
+  const state = getAllergyState();
+  delete state[foodId];
+  saveAllergyState(state);
+  renderAllergy();
+}
+function getDaysLeft(foodId) {
+  const state = getAllergyState();
+  const item = state[foodId];
+  if (!item || item.status !== 'progress') return null;
+  const start = new Date(item.startDate);
+  const now = new Date();
+  const passed = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+  return Math.max(0, item.days - passed);
+}
+function renderAllergy() {
+  const state = getAllergyState();
+  const doneCount = ALLERGY_FOODS.filter(f => state[f.id]?.status === 'done').length;
+  $('allergyBadge').textContent = `${doneCount}/${ALLERGY_FOODS.length}`;
+
+  let canStartIndex = 0;
+  for (let i = 0; i < ALLERGY_FOODS.length; i++) {
+    if (state[ALLERGY_FOODS[i].id]?.status === 'done') canStartIndex = i + 1;
+    else break;
+  }
+  const allDone = doneCount === ALLERGY_FOODS.length;
+  const allergyRecords = getAllergyRecords();
+  let html = '';
+
+  if (allergyRecords.length) {
+    const recent = allergyRecords.slice(0, 3);
+    html += `
+      <div style="background:#ffebee;border-radius:12px;padding:12px;margin-bottom:12px;border-left:3px solid #e57373">
+        <div style="font-size:13px;font-weight:700;color:#c62828;margin-bottom:4px">⚠️ 最近有疑似过敏记录</div>
+        ${recent.map(r => `<div style="font-size:12px;color:#b71c1c;padding:3px 0">${r.date} · ${r.food} · ${(r.reasons || []).join('、')}</div>`).join('')}
+        <div style="font-size:12px;color:#e57373;padding:3px 0;margin-top:4px">建议暂停该食物，观察 3-7 天后再少量尝试，严重时就医。</div>
+      </div>
+    `;
+  }
+
+  if (allDone) {
+    html += `
+      <div class="allergy-summary" style="background:linear-gradient(135deg,#e8f5e9,#d4edda)">
+        <div class="as-title" style="color:#4caf50">🎉 基础排敏已完成</div>
+        <div class="as-desc">蛋黄、根茎类、红肉泥都已顺利通过，可以进入更丰富的辅食阶段了。</div>
+      </div>
+    `;
+  } else {
+    const totalDays = ALLERGY_FOODS.reduce((a, f) => a + f.days, 0);
+    let passedDays = 0;
+    ALLERGY_FOODS.forEach(f => {
+      const item = state[f.id];
+      if (item?.status === 'done') passedDays += f.days;
+      else if (item?.status === 'progress') {
+        const start = new Date(item.startDate);
+        const passed = Math.floor((new Date() - start) / (1000*60*60*24));
+        passedDays += Math.min(passed, f.days);
+      }
+    });
+    const pct = Math.round(passedDays / totalDays * 100);
+    html += `
+      <div class="allergy-summary">
+        <div class="as-title">基础排敏进行中 · ${pct}%</div>
+        <div class="as-desc">蛋黄 → 根茎类蔬菜 → 红肉泥，每种观察 2-3 天。<br>整个过程大约需要 <b>1-2 个月</b>，完成后解锁更丰富的辅食。</div>
+        <div class="progress-bar" style="margin-top:10px"><div style="width:${pct}%"></div></div>
+      </div>
+    `;
+  }
+
+  html += ALLERGY_FOODS.map((f, i) => {
+    const item = state[f.id];
+    let statusHtml = '', actionsHtml = '';
+    if (item?.status === 'done') {
+      statusHtml = `<div class="ai-status status-done">✅ 已完成排敏（${item.doneDate}）</div>`;
+      actionsHtml = `<button class="btn-ghost btn-mini" onclick="resetAllergy('${f.id}')">重置</button>`;
+    } else if (item?.status === 'progress') {
+      const left = getDaysLeft(f.id);
+      if (left > 0) {
+        statusHtml = `<div class="ai-status status-progress">🔄 观察中 · 还需 ${left} 天<span class="countdown">已开始</span></div>`;
+        actionsHtml = `<button class="btn-ghost btn-mini" onclick="resetAllergy('${f.id}')">重置</button>`;
+      } else {
+        statusHtml = `<div class="ai-status status-progress">⏰ 观察期满，可确认完成</div>`;
+        actionsHtml = `
+          <button class="btn-done btn-mini" onclick="completeAllergy('${f.id}')">标记完成</button>
+          <button class="btn-ghost btn-mini" onclick="resetAllergy('${f.id}')">重置</button>
+        `;
+      }
+    } else {
+      const canStart = i === canStartIndex && !allDone;
+      if (canStart) {
+        statusHtml = `<div class="ai-status status-wait">⏳ 待开始 · 建议观察 ${f.days} 天</div>`;
+        actionsHtml = `<button class="btn-start btn-mini" onclick="startAllergy('${f.id}')">开始排敏</button>`;
+      } else {
+        statusHtml = `<div class="ai-status status-locked">🔒 需先完成前一项</div>`;
+        actionsHtml = `<button class="btn-locked btn-mini" disabled>未解锁</button>`;
+      }
+    }
+    return `
+      <div class="allergy-item">
+        <div class="ai-emoji">${f.emoji}</div>
+        <div class="ai-info">
+          <div class="ai-name">${f.name}</div>
+          <div style="font-size:12px;color:#9b8b78;margin-top:2px">${f.desc}</div>
+          ${statusHtml}
+        </div>
+        <div class="allergy-actions">${actionsHtml}</div>
+      </div>
+    `;
+  }).join('');
+  $('allergyContent').innerHTML = html;
+}
+function checkAllergyComplete() {
+  const state = getAllergyState();
+  const allDone = ALLERGY_FOODS.every(f => state[f.id]?.status === 'done');
+  if (allDone && !store.get('baby_celebrated', false)) {
+    store.set('baby_celebrated', true);
+    showCelebrate();
+  }
+}
+function showCelebrate() {
+  $('celebrateOverlay').classList.add('show');
+  const colors = ['#ff8c69','#ffb88c','#ffd93d','#6bcb77','#4d96ff','#ff6b9d'];
+  for (let i = 0; i < 40; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.background = colors[Math.floor(Math.random() * colors.length)];
+    c.style.animationDuration = (2 + Math.random() * 2) + 's';
+    c.style.animationDelay = Math.random() * 0.8 + 's';
+    c.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 5000);
+  }
+}
+function closeCelebrate() { $('celebrateOverlay').classList.remove('show'); }
+
+/* ================= 食物列表 ================= */
+let activeStage = 's1';
+function renderStageTabs() {
+  $('stageTabs').innerHTML = STAGES.map(s =>
+    `<button class="${s.id === activeStage ? 'active' : ''}" onclick="setStage('${s.id}')">${s.name}</button>`
+  ).join('');
+}
+function setStage(id) { activeStage = id; renderStageTabs(); renderFoodList(); }
+function renderFoodList() {
+  const stage = STAGES.find(s => s.id === activeStage);
+  $('foodList').innerHTML = stage.foods.map(f => `
+    <div class="food-item">
+      <div class="emoji">${f.emoji}</div>
+      <div class="info">
+        <div class="name">${f.name}</div>
+        <div class="desc">${f.desc}</div>
+      </div>
+      <span class="tag ${f.cls || ''}">${f.tag}</span>
+    </div>
+  `).join('');
+}
+
+/* ================= 食谱 ================= */
+function renderRecipes() {
+  const stage = getCurrentStage() || STAGES[0];
+  const list = RECIPES[stage.id] || RECIPES.s1;
+  $('recipeHint').textContent = `当前阶段：${stage.name} · ${stage.desc}（共 ${list.length} 个食谱）`;
+  $('recipeList').innerHTML = list.map(r => `
+    <div class="recipe">
+      <div class="r-title">${r.title}</div>
+      <div class="r-meta">${r.meta}</div>
+      <div class="r-step">${r.step.replace(/\n/g, '<br>')}</div>
+    </div>
+  `).join('');
+}
+
+/* ================= 食谱搜索 ================= */
+function onSearchInput() {
+  const val = $('recipeSearch').value.trim();
+  $('searchClear').classList.toggle('show', val.length > 0);
+  renderSearch();
+}
+function clearSearch() {
+  $('recipeSearch').value = '';
+  $('searchClear').classList.remove('show');
+  renderSearch();
+}
+function renderSearch() {
+  const keyword = $('recipeSearch').value.trim().toLowerCase();
+  const resultBox = $('searchResultList');
+  const hintBox = $('searchHint');
+  if (!keyword) {
+    hintBox.textContent = '输入关键字可搜索所有阶段的食谱';
+    resultBox.innerHTML = '';
+    return;
+  }
+  const results = [];
+  Object.keys(RECIPES).forEach(stageId => {
+    const stage = STAGES.find(s => s.id === stageId);
+    RECIPES[stageId].forEach(r => {
+      const text = (r.title + ' ' + r.meta + ' ' + r.step).toLowerCase();
+      if (text.includes(keyword)) {
+        results.push({ ...r, stageName: stage ? stage.name : '' });
+      }
+    });
+  });
+  hintBox.innerHTML = `找到 <b>${results.length}</b> 个相关食谱`;
+  if (!results.length) {
+    resultBox.innerHTML = '<div class="empty">没有找到相关食谱，试试其他关键词</div>';
+    return;
+  }
+  resultBox.innerHTML = results.map(r => `
+    <div class="recipe">
+      <div class="r-title">${r.title} <span style="font-size:10px;color:#1976d2;background:#e3f2fd;padding:1px 8px;border-radius:8px;margin-left:4px">${r.stageName}</span></div>
+      <div class="r-meta">${r.meta}</div>
+      <div class="r-step">${r.step.replace(/\n/g, '<br>')}</div>
+    </div>
+  `).join('');
+}
+
+/* ================= 营养密度检查 ================= */
+let densitySelected = [];
+function renderDensityCats() {
+  $('densityCats').innerHTML = DENSITY_CATS.map(c => `
+    <div class="density-cat ${densitySelected.includes(c.id) ? 'checked' : ''}"
+         onclick="toggleDensityCat('${c.id}')">
+      <span class="dc-emoji">${c.emoji}</span>${c.name}
+    </div>
+  `).join('');
+  updateDensityScore();
+}
+function toggleDensityCat(id) {
+  if (densitySelected.includes(id)) {
+    densitySelected = densitySelected.filter(x => x !== id);
+  } else {
+    densitySelected.push(id);
+  }
+  renderDensityCats();
+}
+function updateDensityScore() {
+  const n = densitySelected.length;
+  const scoreEl = $('dcScore');
+  scoreEl.textContent = `${n} / 5 种`;
+  scoreEl.className = 'dc-score ' + (n >= 4 ? 'good' : n >= 2 ? 'mid' : 'low');
+  const tipEl = $('densityTip');
+  if (n === 0) {
+    tipEl.innerHTML = '建议每餐包含 <b>4-5 种</b>，营养更均衡。';
+  } else if (n < 4) {
+    const missing = DENSITY_CATS.filter(c => !densitySelected.includes(c.id)).map(c => c.name);
+    tipEl.innerHTML = `还差 <b>${4 - n}</b> 种，可以考虑补充：<b>${missing.slice(0, 3).join('、')}</b>。`;
+  } else {
+    tipEl.innerHTML = '👍 营养密度很好，继续保持！';
+  }
+}
+
+/* ================= 补剂 ================= */
+function getSuppOptions() { return store.get('baby_supp_options', [...DEFAULT_SUPPS]); }
+function saveSuppOptions(list) { store.set('baby_supp_options', list); }
+let suppSelected = [];
+function renderSuppTags() {
+  const options = getSuppOptions();
+  $('suppTags').innerHTML = options.map(o => `
+    <div class="supp-tag ${suppSelected.includes(o) ? 'checked' : ''}"
+         onclick="toggleSupp('${o}')">
+      ${o}
+    </div>
+  `).join('');
+}
+function toggleSupp(name) {
+  if (suppSelected.includes(name)) {
+    suppSelected = suppSelected.filter(x => x !== name);
+  } else {
+    suppSelected.push(name);
+  }
+  renderSuppTags();
+}
+function addSuppOption() {
+  const val = $('suppInput').value.trim();
+  if (!val) { alert('请输入补剂名称'); return; }
+  const options = getSuppOptions();
+  if (options.includes(val)) { alert('已存在该补剂'); return; }
+  options.push(val);
+  saveSuppOptions(options);
+  $('suppInput').value = '';
+  renderSuppTags();
+}
+function openSuppManage() {
+  renderSuppManageList();
+  $('suppManageModal').classList.add('show');
+}
+function closeSuppManage() {
+  $('suppManageModal').classList.remove('show');
+}
+function renderSuppManageList() {
+  const options = getSuppOptions();
+  $('suppManageList').innerHTML = options.map(o => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px dashed #f0e7dc">
+      <span style="font-size:14px;font-weight:600">${o}</span>
+      ${DEFAULT_SUPPS.includes(o)
+        ? '<span style="font-size:11px;color:#b0a08c">默认</span>'
+        : `<button class="btn-ghost btn-mini" onclick="delSuppOption('${o}')">删除</button>`}
+    </div>
+  `).join('');
+}
+function addSuppFromManage() {
+  const val = $('suppManageInput').value.trim();
+  if (!val) { alert('请输入补剂名称'); return; }
+  const options = getSuppOptions();
+  if (options.includes(val)) { alert('已存在该补剂'); return; }
+  options.push(val);
+  saveSuppOptions(options);
+  $('suppManageInput').value = '';
+  renderSuppManageList();
+  renderSuppTags();
+}
+function delSuppOption(name) {
+  if (DEFAULT_SUPPS.includes(name)) return;
+  if (!confirm(`删除补剂「${name}」？`)) return;
+  const options = getSuppOptions().filter(o => o !== name);
+  saveSuppOptions(options);
+  suppSelected = suppSelected.filter(o => o !== name);
+  renderSuppManageList();
+  renderSuppTags();
+}
+
+/* ================= 疑似过敏 ================= */
+let allergyFlag = false;
+let allergyReasonsSelected = [];
+function renderAllergyReasons() {
+  if (!allergyFlag) {
+    $('allergyReasons').style.display = 'none';
+    return;
+  }
+  $('allergyReasons').style.display = 'flex';
+  $('allergyReasons').innerHTML = ALLERGY_REASONS.map(r => `
+    <div class="allergy-reason ${allergyReasonsSelected.includes(r) ? 'checked' : ''}"
+         onclick="toggleAllergyReason('${r}')">${r}</div>
+  `).join('');
+}
+function toggleAllergy() {
+  allergyFlag = !allergyFlag;
+  $('allergyToggle').classList.toggle('checked', allergyFlag);
+  if (!allergyFlag) allergyReasonsSelected = [];
+  renderAllergyReasons();
+}
+function toggleAllergyReason(r) {
+  if (allergyReasonsSelected.includes(r)) {
+    allergyReasonsSelected = allergyReasonsSelected.filter(x => x !== r);
+  } else {
+    allergyReasonsSelected.push(r);
+  }
+  renderAllergyReasons();
+}
+function getAllergyRecords() { return store.get('baby_allergy_records', []); }
+
+/* ================= 记录 ================= */
+function addRecord() {
+  const date = $('recDate').value || todayStr();
+  const food = $('recFood').value.trim();
+  if (!food) { alert('请填写吃了什么'); return; }
+  const amount = $('recAmount').value;
+  const note = $('recNote').value.trim();
+
+  const list = store.get('baby_records', []);
+  list.unshift({
+    id: Date.now(),
+    date, food, amount, note,
+    density: [...densitySelected],
+    supps: [...suppSelected],
+    allergy: allergyFlag,
+    allergyReasons: [...allergyReasonsSelected]
+  });
+  store.set('baby_records', list);
+
+  if (allergyFlag) {
+    const allergyList = getAllergyRecords();
+    allergyList.unshift({
+      id: Date.now(),
+      date, food,
+      reasons: [...allergyReasonsSelected],
+      note
+    });
+    store.set('baby_allergy_records', allergyList);
+    renderAllergy();
+  }
+
+  $('recFood').value = ''; $('recNote').value = '';
+  densitySelected = [];
+  suppSelected = [];
+  allergyFlag = false;
+  allergyReasonsSelected = [];
+  $('allergyToggle').classList.remove('checked');
+  renderAllergyReasons();
+  renderDensityCats();
+  renderSuppTags();
+  renderDailyTip();
+  alert('已保存 ✅');
+}
+
+/* ================= 日历视图 ================= */
+let calYear, calMonth;
+function initCal() {
+  const now = new Date();
+  calYear = now.getFullYear();
+  calMonth = now.getMonth();
+}
+function changeMonth(delta) {
+  calMonth += delta;
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  renderCalendar();
+}
+function parseFoods(foodStr) {
+  return foodStr.split(/[+＋、,，\/·]/).map(s => s.trim()).filter(Boolean);
+}
+function renderCalendar() {
+  $('calTitle').textContent = `${calYear}年${calMonth + 1}月`;
+  const firstDay = new Date(calYear, calMonth, 1);
+  const startWeekday = (firstDay.getDay() + 6) % 7;
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const prevMonthDays = new Date(calYear, calMonth, 0).getDate();
+
+  const records = store.get('baby_records', []);
+  const byDate = {};
+  records.forEach(r => {
+    if (!byDate[r.date]) byDate[r.date] = [];
+    byDate[r.date].push(r);
+  });
+
+  const today = todayStr();
+  const cells = [];
+  const totalCells = Math.ceil((startWeekday + daysInMonth) / 7) * 7;
+
+  for (let i = 0; i < totalCells; i++) {
+    let dayNum, dateStr, isOther = false;
+    if (i < startWeekday) {
+      dayNum = prevMonthDays - startWeekday + i + 1;
+      const m = calMonth - 1, y = calMonth === 0 ? calYear - 1 : calYear;
+      dateStr = `${y}-${String(m === -1 ? 12 : m + 1).padStart(2,'0')}-${String(dayNum).padStart(2,'0')}`;
+      isOther = true;
+    } else if (i >= startWeekday + daysInMonth) {
+      dayNum = i - startWeekday - daysInMonth + 1;
+      const m = calMonth + 1, y = calMonth === 11 ? calYear + 1 : calYear;
+      dateStr = `${y}-${String(m === 12 ? 1 : m + 1).padStart(2,'0')}-${String(dayNum).padStart(2,'0')}`;
+      isOther = true;
+    } else {
+      dayNum = i - startWeekday + 1;
+      dateStr = `${calYear}-${String(calMonth + 1).padStart(2,'0')}-${String(dayNum).padStart(2,'0')}`;
+    }
+
+    const dayRecords = byDate[dateStr] || [];
+    const allFoods = [];
+    const allSupps = [];
+    dayRecords.forEach(r => {
+      parseFoods(r.food).forEach(f => { if (!allFoods.includes(f)) allFoods.push(f); });
+      (r.supps || []).forEach(s => { if (!allSupps.includes(s)) allSupps.push(s); });
+    });
+    const shownFoods = allFoods.slice(0, 4);
+    const moreFoods = allFoods.length - shownFoods.length;
+
+    const cls = ['cal-day'];
+    if (isOther) cls.push('other-month');
+    if (dateStr === today) cls.push('today');
+
+    cells.push(`
+      <div class="${cls.join(' ')}" onclick="openDayModal('${dateStr}')">
+        <div class="d-num">${dayNum}</div>
+        <div class="d-foods">
+          ${shownFoods.map(f => `<div class="cal-food-chip">${f}</div>`).join('')}
+          ${moreFoods > 0 ? `<div class="cal-food-chip more">+${moreFoods}</div>` : ''}
+          ${allSupps.map(s => `<div class="cal-food-chip supp">💊${s}</div>`).join('')}
+        </div>
+      </div>
+    `);
+  }
+  $('calGrid').innerHTML = cells.join('');
+
+  const hasThisMonth = records.some(r => r.date.startsWith(`${calYear}-${String(calMonth+1).padStart(2,'0')}`));
+  $('calEmptyTip').style.display = hasThisMonth ? 'none' : 'block';
+}
+
+function openDayModal(dateStr) {
+  const records = store.get('baby_records', []).filter(r => r.date === dateStr);
+  $('dayModalTitle').textContent = dateStr + ' 的记录';
+  if (!records.length) {
+    $('dayModalContent').innerHTML = '<div class="empty">这一天没有记录</div>';
+  } else {
+    $('dayModalContent').innerHTML = records.map(r => {
+      let densityHtml = '';
+      if (r.density && r.density.length) {
+        const names = r.density.map(id => DENSITY_CATS.find(c => c.id === id)?.name).filter(Boolean);
+        densityHtml = `<div class="r-note" style="color:#4caf50">🥗 ${names.join('、')}（${names.length}种）</div>`;
+      }
+      let suppHtml = '';
+      if (r.supps && r.supps.length) suppHtml = `<div class="r-supp">💊 补剂：${r.supps.join('、')}</div>`;
+      let allergyHtml = '';
+      if (r.allergy) allergyHtml = `<div class="r-allergy">⚠️ 疑似过敏：${(r.allergyReasons || []).join('、') || '已标记'}</div>`;
+      return `
+        <div class="record-item">
+          <div class="r-left">
+            <div class="r-food">${r.food}${r.amount ? ' · ' + r.amount : ''}</div>
+            ${densityHtml}
+            ${suppHtml}
+            ${allergyHtml}
+            ${r.note ? `<div class="r-note">${r.note}</div>` : ''}
+          </div>
+          <button class="del-btn" onclick="delRecordFromModal(${r.id})">×</button>
+        </div>
+      `;
+    }).join('');
+  }
+  $('dayModal').classList.add('show');
+}
+function closeDayModal() { $('dayModal').classList.remove('show'); }
+function delRecordFromModal(id) {
+  if (!confirm('删除这条记录？')) return;
+  const list = store.get('baby_records', []).filter(r => r.id !== id);
+  store.set('baby_records', list);
+  const title = $('dayModalTitle').textContent.replace(' 的记录', '');
+  openDayModal(title);
+  renderCalendar();
+}
+
+/* ================= 我的数据页 ================= */
+function switchDataTab(tab, btn) {
+  document.querySelectorAll('.data-tabs button').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  $('dataTab-report').style.display = tab === 'report' ? 'block' : 'none';
+  $('dataTab-supp').style.display = tab === 'supp' ? 'block' : 'none';
+  if (tab === 'report') renderReport();
+  if (tab === 'supp') renderSuppCalendar();
+}
+
+let reportWeekOffset = 0;
+function setReportWeek(offset, btn) {
+  reportWeekOffset = offset;
+  document.querySelectorAll('.report-tabs button').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderReport();
+}
+function getWeekRange(offset) {
+  const now = new Date();
+  const day = now.getDay();
+  const diffToMonday = (day + 6) % 7;
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - diffToMonday + offset * 7);
+  monday.setHours(0,0,0,0);
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  sunday.setHours(23,59,59,999);
+  return { monday, sunday };
+}
+function fmtDate(d) {
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function renderReport() {
+  const { monday, sunday } = getWeekRange(reportWeekOffset);
+  const mondayStr = fmtDate(monday);
+  const sundayStr = fmtDate(sunday);
+  const records = store.get('baby_records', [])
+    .filter(r => r.date >= mondayStr && r.date <= sundayStr);
+
+  const totalMeals = records.length;
+  const totalCats = records.reduce((sum, r) => sum + (r.density ? r.density.length : 0), 0);
+  const avg = totalMeals ? (totalCats / totalMeals).toFixed(1) : '0';
+
+  const catCount = {};
+  DENSITY_CATS.forEach(c => catCount[c.id] = 0);
+  records.forEach(r => {
+    (r.density || []).forEach(id => {
+      if (catCount[id] !== undefined) catCount[id]++;
+    });
+  });
+
+  const lowCats = DENSITY_CATS
+    .filter(c => totalMeals > 0 && catCount[c.id] / totalMeals < 0.5)
+    .map(c => c.name);
+
+  let html = `
+    <div class="report-summary">
+      <div class="rs-big">${avg} <span style="font-size:14px;font-weight:600">种 / 餐</span></div>
+      <div class="rs-desc">本周共记录 <b>${totalMeals}</b> 餐，平均每餐包含 <b>${avg}</b> 种食物类别</div>
+      <div class="rs-sub">${mondayStr} ～ ${sundayStr}</div>
+    </div>
+  `;
+  html += DENSITY_CATS.map(c => {
+    const count = catCount[c.id];
+    const pct = totalMeals ? Math.round(count / totalMeals * 100) : 0;
+    const isLow = totalMeals > 0 && pct < 50;
+    let barColor = '#ff8c69';
+    if (pct >= 80) barColor = '#4caf50';
+    else if (pct >= 50) barColor = '#ffb88c';
+    else if (pct > 0) barColor = '#e57373';
+    return `
+      <div class="cat-stat ${isLow ? 'low' : ''}">
+        <div class="cs-emoji">${c.emoji}</div>
+        <div class="cs-info">
+          <div class="cs-name">${c.name}</div>
+          <div class="cs-bar"><div style="width:${pct}%;background:${barColor}"></div></div>
+        </div>
+        <div class="cs-count">${count}/${totalMeals}</div>
+      </div>
+    `;
+  }).join('');
+
+  if (totalMeals === 0) {
+    html += `<div class="report-tip">这一周还没有记录，去「记录」页添加吧～</div>`;
+  } else if (lowCats.length) {
+    html += `<div class="report-tip">📉 本周 <span class="warn">${lowCats.join('、')}</span> 吃得偏少，下周可以多安排一些，让每餐更均衡。</div>`;
+  } else {
+    html += `<div class="report-tip">👍 本周各类别都覆盖得不错，继续保持！</div>`;
+  }
+  $('reportContent').innerHTML = html;
+}
+
+let suppCalYear, suppCalMonth;
+function initSuppCal() {
+  const now = new Date();
+  suppCalYear = now.getFullYear();
+  suppCalMonth = now.getMonth();
+}
+function changeSuppMonth(delta) {
+  suppCalMonth += delta;
+  if (suppCalMonth < 0) { suppCalMonth = 11; suppCalYear--; }
+  if (suppCalMonth > 11) { suppCalMonth = 0; suppCalYear++; }
+  renderSuppCalendar();
+}
+function renderSuppCalendar() {
+  $('suppCalTitle').textContent = `${suppCalYear}年${suppCalMonth + 1}月`;
+  const firstDay = new Date(suppCalYear, suppCalMonth, 1);
+  const startWeekday = (firstDay.getDay() + 6) % 7;
+  const daysInMonth = new Date(suppCalYear, suppCalMonth + 1, 0).getDate();
+  const prevMonthDays = new Date(suppCalYear, suppCalMonth, 0).getDate();
+
+  const records = store.get('baby_records', []);
+  const byDate = {};
+  records.forEach(r => {
+    if (!byDate[r.date]) byDate[r.date] = [];
+    byDate[r.date].push(r);
+  });
+
+  const today = todayStr();
+  const cells = [];
+  const totalCells = Math.ceil((startWeekday + daysInMonth) / 7) * 7;
+  const monthPrefix = `${suppCalYear}-${String(suppCalMonth+1).padStart(2,'0')}`;
+  let adDays = 0, d3Days = 0, missDays = 0;
+
+  for (let i = 0; i < totalCells; i++) {
+    let dayNum, dateStr, isOther = false;
+    if (i < startWeekday) {
+      dayNum = prevMonthDays - startWeekday + i + 1;
+      const m = suppCalMonth - 1, y = suppCalMonth === 0 ? suppCalYear - 1 : suppCalYear;
+      dateStr = `${y}-${String(m === -1 ? 12 : m + 1).padStart(2,'0')}-${String(dayNum).padStart(2,'0')}`;
+      isOther = true;
+    } else if (i >= startWeekday + daysInMonth) {
+      dayNum = i - startWeekday - daysInMonth + 1;
+      const m = suppCalMonth + 1, y = suppCalMonth === 11 ? suppCalYear + 1 : suppCalYear;
+      dateStr = `${y}-${String(m === 12 ? 1 : m + 1).padStart(2,'0')}-${String(dayNum).padStart(2,'0')}`;
+      isOther = true;
+    } else {
+      dayNum = i - startWeekday + 1;
+      dateStr = `${suppCalYear}-${String(suppCalMonth + 1).padStart(2,'0')}-${String(dayNum).padStart(2,'0')}`;
+    }
+
+    const dayRecords = byDate[dateStr] || [];
+    const allSupps = [];
+    dayRecords.forEach(r => {
+      (r.supps || []).forEach(s => { if (!allSupps.includes(s)) allSupps.push(s); });
+    });
+
+    const isPast = dateStr <= today && !isOther;
+    const hasAD = allSupps.includes('AD');
+    const hasD3 = allSupps.includes('D3');
+    const hasExtra = allSupps.some(s => s !== 'AD' && s !== 'D3');
+    const noSupp = allSupps.length === 0;
+
+    if (!isOther && dateStr.startsWith(monthPrefix)) {
+      if (hasAD) adDays++;
+      if (hasD3) d3Days++;
+      if (isPast && noSupp) missDays++;
+    }
+
+    let dotsHtml = '';
+    if (!isOther) {
+      dotsHtml = `
+        <div class="sc-dot">
+          <i class="${hasAD ? 'taken' : (isPast ? 'miss' : '')}"></i>
+          <i class="${hasD3 ? 'taken' : (isPast ? 'miss' : '')}"></i>
+          ${hasExtra ? '<i class="extra"></i>' : ''}
+        </div>
+      `;
+    }
+
+    const cls = ['supp-cal-day'];
+    if (isOther) cls.push('other-month');
+    if (dateStr === today) cls.push('today');
+    if (isPast && noSupp) cls.push('has-miss');
+
+    cells.push(`
+      <div class="${cls.join(' ')}">
+        <div class="sc-num">${dayNum}</div>
+        ${dotsHtml}
+      </div>
+    `);
+  }
+  $('suppCalGrid').innerHTML = cells.join('');
+
+  $('suppStatRow').innerHTML = `
+    <div class="supp-stat">
+      <div class="ss-name">AD 打卡</div>
+      <div class="ss-val">${adDays} 天</div>
+      <div class="ss-sub">本月已记录</div>
+    </div>
+    <div class="supp-stat">
+      <div class="ss-name">D3 打卡</div>
+      <div class="ss-val">${d3Days} 天</div>
+      <div class="ss-sub">本月已记录</div>
+    </div>
+    <div class="supp-stat ${missDays > 0 ? 'bad' : ''}">
+      <div class="ss-name">漏打卡</div>
+      <div class="ss-val">${missDays} 天</div>
+      <div class="ss-sub">本月未记录补剂</div>
+    </div>
+  `;
+}
+
+/* ================= 数据管理 ================= */
+function exportData() {
+  const data = {
+    gender: store.get('baby_gender', 'girl'),
+    name: store.get('baby_name', ''),
+    birthDate: store.get('baby_birth', ''),
+    startDate: store.get('baby_start', ''),
+    allergy: getAllergyState(),
+    suppOptions: getSuppOptions(),
+    records: store.get('baby_records', []),
+    allergyRecords: store.get('baby_allergy_records', [])
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'xiaofandazi-data.json';
+  a.click();
+}
+function clearAll() {
+  if (!confirm('确定清空所有数据？不可恢复')) return;
+  localStorage.removeItem('baby_records');
+  localStorage.removeItem('baby_name');
+  localStorage.removeItem('baby_birth');
+  localStorage.removeItem('baby_start');
+  localStorage.removeItem('baby_gender');
+  localStorage.removeItem('baby_allergy');
+  localStorage.removeItem('baby_celebrated');
+  localStorage.removeItem('baby_supp_options');
+  localStorage.removeItem('baby_allergy_records');
+  location.reload();
+}
+
+/* ================= 初始化 ================= */
+function init() {
+  $('babyName').value = store.get('baby_name', '');
+  $('birthDate').value = store.get('baby_birth', '');
+  $('startDate').value = store.get('baby_start', '');
+  $('recDate').value = todayStr();
+
+  const gender = store.get('baby_gender', 'girl');
+  applyTheme(gender);
+
+  const stage = getCurrentStage();
+  if (stage) activeStage = stage.id;
+
+  initCal();
+  initSuppCal();
+  renderRoute();
+  renderStageTabs();
+  renderFoodList();
+  renderCurrentStage();
+  renderAllergy();
+  renderDensityCats();
+  renderSuppTags();
+  renderAllergyReasons();
+  renderRecipes();
+  renderSearch();
+  renderFocus();
+  renderMeBabyInfo();
+  renderReport();
+  renderSuppCalendar();
+  renderDailyTip();
+
+  checkAllergyComplete();
+
+  $('birthDate').addEventListener('change', e => {
+    saveBabyInfo();
+    renderCurrentStage();
+    const s = getCurrentStage();
+    if (s) { activeStage = s.id; renderStageTabs(); renderFoodList(); }
+    renderRecipes();
+    renderFocus();
+    renderMeBabyInfo();
+  });
+  $('startDate').addEventListener('change', e => saveBabyInfo());
+  $('babyName').addEventListener('change', e => renderMeBabyInfo());
+}
+init();
+</script>
+</body>
+</html>
